@@ -1,6 +1,7 @@
 // npm install dotenv
 require('dotenv').config();
 const { prompt } = require("../prompts/creation_image_prompt");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const API_KEY = process.env.GEMINI_API_KEY;
 
@@ -9,6 +10,42 @@ const API_KEY = process.env.GEMINI_API_KEY;
  * @returns {Promise<string>} The generated prompt text.
  * @throws {Error} If the API key is missing, the request fails, or the response format is invalid.
  */
+
+// async function createPrompt() {
+//     console.log(API_KEY);
+//     console.log(API_KEY?.length);
+//     if (!API_KEY) {
+//         throw new Error("GEMINI_API_KEY is missing in environment variables.");
+//     }
+
+//     try {
+//         const genAI = new GoogleGenerativeAI({ apiKey: API_KEY });
+
+//         console.log("Generating prompt via Gemini API (google/generative-ai SDK)...");
+
+//         // Select the model
+//         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+//         // Generate content using the SDK
+//         const result = await model.generateContent({ contents: [{ parts: [{ text: prompt }] }] });
+
+//         // Extract the response
+//         const generatedText = result.response.text();
+
+//         if (!generatedText) {
+//             console.error("Empty response from Gemini API");
+//             throw new Error("Failed to generate prompt: Empty response from Gemini API");
+//         }
+
+//         console.log("Prompt generated successfully.");
+//         return generatedText;
+
+//     } catch (error) {
+//         console.error("Error in createPrompt controller:", error.message);
+//         throw error;
+//     }
+// }
+
 async function createPrompt() {
     if (!API_KEY) {
         throw new Error("GEMINI_API_KEY is missing in environment variables.");

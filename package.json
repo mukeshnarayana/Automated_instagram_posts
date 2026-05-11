@@ -11,6 +11,8 @@
     "start": "nodemon server.js"
   },
   "dependencies": {
+    "@google-cloud/vertexai": "^1.12.0",
+    "@google/generative-ai": "^0.24.1",
     "dotenv": "^17.4.2",
     "express": "^4.22.1",
     "mongodb": "^7.2.0",
