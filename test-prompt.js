@@ -1,6 +1,6 @@
 const { createPrompt } = require("./src/controllers/create_prompt");
 const {generateImages} = require("./src/controllers/create_images");
-
+const {uploadAllImages} = require("./src/controllers/store_raw_images")
 async function test() {
     try {
         console.log("Starting test...");
@@ -9,7 +9,8 @@ async function test() {
 
         const images = await generateImages(result); 
         console.log("Generated Images:\n", images);
-        console.log(images.length);
+        //console.log(images.length);
+        const store = await uploadAllImages(images)
         console.log("\n--- TEST SUCCESSFUL ---");
         console.log("------------------------\n");
     } catch (error) {

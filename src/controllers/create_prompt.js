@@ -4,6 +4,7 @@ const { prompt } = require("../prompts/creation_image_prompt");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const API_KEY = process.env.GEMINI_API_KEY;
+const genAI = new GoogleGenerativeAI(API_KEY);
 
 /**
  * Generates a cinematic Kalamkari wallpaper prompt using the Gemini API.
@@ -46,6 +47,65 @@ const API_KEY = process.env.GEMINI_API_KEY;
 //     }
 // }
 
+async function enhancePrompt(userPrompt) {
+    if (!userPrompt) return "";
+    //const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-001" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
+    const promptRegex = /AI Image Prompt \d*:\s*([\s\S]*?)(?=Optional Reel Caption|AI Image Prompt \d*|$)/gi;
+    
+    const prompts = [];
+    let match;
+    
+    // Reset regex index
+    promptRegex.lastIndex = 0;
+    while ((match = promptRegex.exec(userPrompt)) !== null) {
+        const extractedPrompt = match[1].trim();
+        if (extractedPrompt) {
+            prompts.push(extractedPrompt);
+        }
+    }
+
+    const enhancedPrompts = [];
+    for (let i = 0; i < prompts.length; i++) {
+         if (i > 0) {
+                console.log("Waiting 65 seconds to respect API quota...");
+                await new Promise(resolve => setTimeout(resolve, 65000));
+            }
+        console.log(`Enhancing prompt ${i + 1}/${prompts.length}...`);
+        const result = await model.generateContent(`
+                You are DALL-E 3's internal prompt rewriter.
+                Rewrite the user's idea exactly how DALL-E 3 would internally 
+                expand it for photorealistic output.
+                
+                Style rules:
+                - Real photography, not illustration or digital art
+                - Shot on Canon 5D, 85mm, f/1.8
+                - Golden hour or soft natural light
+                - Warm cinematic color grade
+                - Real skin, real textures, imperfections
+                - Shallow depth of field
+                - 9:16 portrait ratio composition
+                - Never mention "digital art", "illustration", "render", "3D"
+                
+                Return ONLY the rewritten prompt. No explanation.
+                
+                User idea: "${prompts[i]}"
+        `);
+        enhancedPrompts.push(result.response.text().trim());
+    }
+
+    let resultText = userPrompt;
+    let index = 0;
+    promptRegex.lastIndex = 0;
+    resultText = resultText.replace(promptRegex, (fullMatch) => {
+        const prefix = fullMatch.split(":")[0] + ": ";
+        const enhanced = enhancedPrompts[index++];
+        return `${prefix}${enhanced}\n`;
+    });
+
+    return resultText;
+}
+
 async function createPrompt() {
     if (!API_KEY) {
         throw new Error("GEMINI_API_KEY is missing in environment variables.");
@@ -83,7 +143,11 @@ async function createPrompt() {
         }
 
         const generatedText = data.candidates[0].content.parts[0].text;
-        console.log("Prompt generated successfully.");
+        // console.log("Initial prompt generated. Enhancing individual image prompts...");
+        
+        // const finalPrompt = await enhancePrompt(generatedText);
+        
+        // console.log("Prompt generated and enhanced successfully.");
         return generatedText;
 
     } catch (error) {
