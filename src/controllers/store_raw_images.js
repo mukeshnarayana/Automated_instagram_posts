@@ -34,7 +34,28 @@ async function uploadAllImages(buffers) {
   return urls;
 }
 
-module.exports = {uploadAllImages}
+async function getallimages() {
+  try {
+    const bucket = storage.bucket(BUCKET_NAME);
+    // Fetch all files with the 'rawimages/' prefix
+    const [files] = await bucket.getFiles({ prefix: 'rawimages/' });
+    
+    // Map files to their public URLs
+    const urls = files
+      .filter(file => !file.name.endsWith('/')) // Filter out folder placeholders
+      .map(file => {
+        return `https://storage.googleapis.com/${BUCKET_NAME}/${file.name}`;
+      });
+
+    console.log(`Successfully fetched ${urls.length} images from GCS.`);
+    return urls;
+  } catch (error) {
+    console.error("Error fetching images from GCS:", error);
+    throw error;
+  }
+}
+
+module.exports = { uploadAllImages, getallimages }
 
 // // Use it
 // const urls = await uploadAllImages(generatedImages);

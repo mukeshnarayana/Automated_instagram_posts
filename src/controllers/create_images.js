@@ -13,9 +13,10 @@ const ai = new GoogleGenAI({
         }
     }
 });
+//const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 // Initialize the Imagen model
 // Initialize the model ID
-const MODEL_ID = "imagen-3.0-generate-001";
+const MODEL_ID = "imagen-4.0-ultra-generate-001";
 
 //Image generation function using gcp vertex model
 async function generateImages(generatedText) {
@@ -79,13 +80,6 @@ async function generateImages(generatedText) {
         throw error;
     }
 } 
-
-
-
-
-
-
-
 
 //using hugging face
 // async function generateImages(generatedText) {
