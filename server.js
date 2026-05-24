@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
  * Grouped into a single function to be called by the cron job
  */
 async function runDailyAutomation() {
-    console.log(`[${new Date().toLocaleString()}] 🚀 Starting scheduled daily automation...`);
+    console.log(`[${new Date().toLocaleString()}] Starting scheduled daily automation...`);
     try {
         // 1. Create Prompt
         console.log("Step 1: Creating AI Prompt...");
@@ -40,29 +40,29 @@ async function runDailyAutomation() {
         const postResult = await postimages(publicUrls);
         
         if (postResult && postResult.success) {
-            console.log(`[${new Date().toLocaleString()}] ✅ Daily automation completed successfully! Media ID: ${postResult.mediaId}`);
+            console.log(`[${new Date().toLocaleString()}] Daily automation completed successfully! Media ID: ${postResult.mediaId}`);
         } else {
-            console.error(`[${new Date().toLocaleString()}] ⚠️ Automation finished with warnings:`, postResult?.error);
+            console.error(`[${new Date().toLocaleString()}] Automation finished with warnings:`, postResult?.error);
         }
     } catch (error) {
-        console.error(`[${new Date().toLocaleString()}] ❌ Daily automation FAILED:`, error.message);
+        console.error(`[${new Date().toLocaleString()}] Daily automation FAILED:`, error.message);
         console.error(error);
     }
 }
 
 // ─── CRON JOB ────────────────────────────────────────────────────────────────
-// Schedule: Every day at 11:55 PM (23:55)
-cron.schedule("55 23 * * *", () => {
+// Schedule: 6:55 AM and 11:55 PM daily
+cron.schedule("55 6,23 * * *", () => {
     runDailyAutomation();
 }, {
     scheduled: true,
-    timezone: "Asia/Kolkata" // Assuming the user is in India based on "Kalamkari" and current time offset
+    timezone: "Asia/Kolkata" // Based on IST
 });
 
-console.log("⏰ Daily automation cron job scheduled for 11:55 PM.");
+console.log("⏰ Daily automation cron job scheduled for 6:55 AM and 11:55 PM.");
 
 app.get("/", (req, res) => {
-    res.send("Instagram Automation Server is running. Cron job scheduled for 11:55 PM daily.");
+    res.send("Instagram Automation Server is running. Cron job scheduled for 6:55 AM and 11:55 PM daily.");
 });
 
 // Manual trigger for testing (optional, can be removed)

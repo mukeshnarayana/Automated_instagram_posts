@@ -12,7 +12,7 @@ async function test() {
         console.log(images)
         console.log(`Generated ${images.length} images.`);
         
-        console.log("Uploading upscaled images...");
+        console.log("Uploading  images...");
         const store = await uploadAllImages(images);
 
         console.log("posting the images") 

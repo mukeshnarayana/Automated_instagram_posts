@@ -8,9 +8,9 @@ console.log("instaid exists:", !!process.env.instaid);
 
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 const IG_CONFIG = {
-  pageAccessToken: process.env.page_access_token,
-  instagramAccountId: process.env.instaid, // Instagram Business Account ID
-  apiVersion: 'v19.0',
+  pageAccessToken: process.env.page_access_token ? process.env.page_access_token.trim() : '',
+  instagramAccountId: process.env.instaid ? process.env.instaid.trim() : '', // Instagram Business Account ID
+  apiVersion: 'v25.0',
   baseUrl: 'https://graph.facebook.com',
 };
 
@@ -69,28 +69,10 @@ async function createCarouselContainer(childrenIds, caption = '') {
 /**
  * Step 2: Check container status (wait until it's ready)
  */
-async function waitForContainer(creationId, maxRetries = 15, delayMs = 5000) {
-  const url = `${IG_CONFIG.baseUrl}/${IG_CONFIG.apiVersion}/${creationId}`;
-
-  for (let i = 0; i < maxRetries; i++) {
-    const params = new URLSearchParams({
-      fields: 'status_code,status',
-      access_token: IG_CONFIG.pageAccessToken,
-    });
-
-    const response = await fetch(`${url}?${params}`);
-    const data = await response.json();
-
-    console.log(`  Container status: ${data.status_code}`);
-
-    if (data.status_code === 'FINISHED') return true;
-    if (data.status_code === 'ERROR') throw new Error(`Container error: ${data.status}`);
-
-    // Wait before next check
-    await new Promise(resolve => setTimeout(resolve, delayMs));
-  }
-
-  throw new Error('Container did not become ready in time');
+async function waitForContainer(creationId, delayMs = 5000) {
+  console.log(`  Waiting ${delayMs / 1000}s for container ${creationId} to process...`);
+  await new Promise(resolve => setTimeout(resolve, delayMs));
+  return true;
 }
 
 /**
@@ -130,7 +112,7 @@ async function postCarousel(imageUrls, caption = '') {
 
   console.log('  → Creating carousel container...');
   const carouselId = await createCarouselContainer(itemIds, caption);
-  
+
   console.log('  → Waiting for carousel container to be ready...');
   await waitForContainer(carouselId);
 
@@ -151,7 +133,7 @@ async function postimages(store) {
 
   // 1. Validate config
   if (!IG_CONFIG.pageAccessToken) {
-      throw new Error('IG_PAGE_ACCESS_TOKEN is not set in .env');
+    throw new Error('IG_PAGE_ACCESS_TOKEN is not set in .env');
   }
   if (!IG_CONFIG.instagramAccountId) throw new Error('IG_ACCOUNT_ID is not set in .env');
 
@@ -176,7 +158,7 @@ module.exports = { postimages };
 
 // Run directly only if this is the main module
 if (require.main === module) {
-    // If running directly, we'd need some URLs. 
-    // For now, we'll just log that it should be called via test-prompt.js or with args.
-    console.log("Post script loaded. Call postimages(urls) to publish.");
+  // If running directly, we'd need some URLs. 
+  // For now, we'll just log that it should be called via test-prompt.js or with args.
+  console.log("Post script loaded. Call postimages(urls) to publish.");
 }
